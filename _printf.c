@@ -1,49 +1,62 @@
 #include "main.h"
+#include <stdarg.h>
+#include <unistd.h>
 
 /**
- * _printf - prints anything
- * @format: the format string
- * Return: number of bytes printed
+ * _printf - Produces output according to a format
+ * @format: Format string containing format specifiers
+ * * Return: Number of characters printed (excluding null byte)
  */
 int _printf(const char *format, ...)
 {
-	int sum = 0;
-	va_list ap;
-	char *p, *start;
-	params_t params = PARAMS_INIT;
+    va_list args;
+    int count = 0;
 
-	va_start(ap, format);
+    if (!format || (format[0] == '%' && format[1] == '\0'))
+        return (-1);
 
-	if (!format || (format[0] == '%' && !format[1]))
-		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-	for (p = (char *)format; *p; p++)
-	{
-		init_params(&params, ap);
-		if (*p != '%')
-		{
-			sum += _putchar(*p);
-			continue;
-		}
-		start = p;
-		p++;
-		while (get_flag(p, &params)) /* while char at p is flag char */
-		{
-			p++; /* next char */
-		}
-		p = get_width(p, &params, ap);
-		p = get_precision(p, &params, ap);
-		if (get_modifier(p, &params))
-			p++;
-		if (!get_specifier(p))
-			sum += print_from_to(start, p,
-				params.l_modifier || params.h_modifier ? p - 1 : 0);
-		else
-			sum += get_print_func(p, ap, &params);
-	}
-	_putchar(BUF_FLUSH);
-	va_end(ap);
-	return (sum);
+    va_start(args, format);
+
+    while (*format)
+    {
+        if (*format == '%')
+        {
+            format++;
+            if (*format == '\0')
+            {
+                va_end(args);
+                return (-1);
+            }
+
+            if (*format == 'c')
+            {
+                count += _putchar(va_arg(args, int));
+            }
+            else if (*format == 's')
+            {
+                count += Print_string(va_arg(args, char *));
+            }
+            else if (*format == '%')
+            {
+                count += _putchar('%');
+            }
+            else if (*format == 'd' || *format == 'i')
+            {
+                count += Print_number(va_arg(args, int));
+            }
+            else
+            {
+                count += _putchar('%');
+                count += _putchar(*format);
+            }
+        }
+        else
+        {
+            count += _putchar(*format);
+        }
+        format++;
+    }
+
+    va_end(args);
+    return (count);
 }
-
