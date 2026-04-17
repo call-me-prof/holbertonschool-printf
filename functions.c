@@ -23,7 +23,7 @@ int Print_String(char *str)
 
     if (!str)
         str = "(null)";
-int i;
+
     for (i = 0; str[i] != '\0';i++ )
     {
 	    count += _putchar(str[i]);
